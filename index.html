@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-Enabled Chatbot</title>
+    <script>
+        // Initialize Speech Recognition (Voice Input)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+
+        recognition.onresult = async (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("User said: ", transcript);
+
+            // Send user input to Dialogflow
+            const response = await getDialogflowResponse(transcript);
+
+            // Speak the chatbot's response
+            speakText(response);
+        };
+
+        function startVoiceRecognition() {
+            recognition.start();
+        }
+
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            speechSynthesis.speak(utterance);
+        }
+
+        async function getDialogflowResponse(inputText) {
+            // Placeholder for Dialogflow API interaction (use your own server to interact with Dialogflow)
+            const response = await fetch('https://api.dialogflow.com/v1/query?v=20150910', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer YOUR_DIALOGFLOW_API_KEY', // Replace with your Dialogflow API Key
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: inputText,
+                    lang: 'en',
+                    sessionId: '12345'
+                })
+            });
+
+            const data = await response.json();
+            return data.result.fulfillment.speech; // Return the response to be spoken
+        }
+    </script>
+</head>
+<body>
+    <h1>Voice-Enabled Chatbot</h1>
+    <button onclick="startVoiceRecognition()">🎤 Speak to Chatbot</button>
+</body>
+</html>
